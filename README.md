@@ -13,7 +13,7 @@ Setup & Deployment
 Clone this repository:
 
 
-git clone https://github.com/your-org/odoo_project.git
+git clone https://github.com/durgeshgupt9/odoo_jenkins_cicd.git
 cd odoo_project
 Run the installation script to create deployment structure and start containers:
 
