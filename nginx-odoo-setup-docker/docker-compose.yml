@@ -41,7 +41,7 @@ services:
       - "8069:8069"
 
   nginx:
-    image: nginx:alpine
+    image: nginx:latest
     container_name: odoo18-nginx
     depends_on:
       - odoo

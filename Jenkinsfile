@@ -15,7 +15,9 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/your-org/odoo_project.git' 
+                withCredentials([string(credentialsId: 'GIT_PAT', variable: 'TOKEN')]) {
+                    sh 'git clone https://${TOKEN}@github.com/durgeshgupt9/odoo_jenkins_cicd.git'
+                }
             }
         }
 
