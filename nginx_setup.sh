@@ -14,6 +14,10 @@ for tool in "${REQUIRED_TOOLS[@]}"; do
   fi
 done
 
+# Create html_pages folder
+HTML_DIR="html_pages"
+mkdir -p "$HTML_DIR"
+
 generate_unique_html_pages() {
   local count=${1:-5}
 
@@ -45,9 +49,9 @@ generate_unique_html_pages() {
     local bg=${backgrounds[$i % ${#backgrounds[@]}]}
     local text=${textcolors[$i % ${#textcolors[@]}]}
     local layout=${layouts[$i % ${#layouts[@]}]}
-    local filename="unique_page_$i.html"
+    local filename="$HTML_DIR/unique_page_$i.html"
 
-    cat <<EOF > $filename
+cat <<EOF > "$filename"
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -99,7 +103,7 @@ for ((server=1; server<=no_of_server; server++)); do
 
   if [[ -z "$path" || ! -f "$path" ]]; then
     generate_unique_html_pages $((server_count + 1))
-    path="unique_page_$((server_count+1)).html"
+    path="$HTML_DIR/unique_page_$((server_count+1)).html"
   fi
 
   server_port+=("$port")
@@ -166,12 +170,12 @@ EOF
 systemctl reload nginx
 
 apt install certbot python3-certbot-nginx -y
-read -p "do you want to add domain or not" input
-if [[ $input -eq "y" ]]; then
+read -p "do you want to add domain or not (y/n): " input
+if [[ $input == "y" ]]; then
     read -p "Enter domain name: " domain
     if [[ -z "$domain" ]]; then
       echo "No domain provided."
-      return 1
+      exit 1
     fi
     nginx_conf=$(grep -Ril "$domain" /etc/nginx/sites-enabled /etc/nginx/conf.d 2>/dev/null)
 
@@ -180,7 +184,7 @@ if [[ $input -eq "y" ]]; then
       echo "$nginx_conf"
     else
       echo "Domain $domain is NOT configured in NGINX."
-      sed -i 's/server_name localhost;/server_name localhost $domain;/' /etc/nginx/conf.d/nginx_config.conf
+      sed -i "s/server_name localhost;/server_name localhost $domain;/" /etc/nginx/conf.d/nginx_config.conf
       systemctl stop nginx
       systemctl status nginx
       certbot --nginx
@@ -222,7 +226,7 @@ if [[ $input -eq "y" ]]; then
             proxy_pass http://backend_servers;
         }
     }
-    EOF
+EOF
 
             echo "Nginx config updated for $domain"
             systemctl restart nginx
@@ -232,5 +236,5 @@ if [[ $input -eq "y" ]]; then
         fi
     fi
 else
-  echo "default localhost is setup...."
+  echo "Default localhost is setup...."
 fi
