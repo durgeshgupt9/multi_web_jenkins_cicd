@@ -1,85 +1,65 @@
-Odoo 18 Deployment with Docker, Nginx, PostgreSQL & Jenkins CI/CD
--------------------------------------------------------------------
-This repository provides a complete production-ready setup for deploying Odoo 18 using Docker Compose, PostgreSQL, and Nginx with SSL and domain support. It includes an automated Jenkins pipeline that monitors your custom Odoo addons, pulls changes, and reloads the Odoo container seamlessly.
-Docker & Docker Compose installed on the server
+# Dynamic Docker-based NGINX with Jenkins CI/CD, SSL, and Auto HTML Generation
 
-Jenkins server with Git access and permission to run Docker commands
+This project sets up a **Docker-based NGINX** load balancer with:
 
-Domain pointed to your server IP (for Nginx + SSL)
+- Dynamic container restarts on Git changes using **Jenkins CI/CD (Poll SCM)**
+- No `docker-compose` – handled via individual Docker commands
+- Domain-based routing with **SSL support**
+- Auto-generated HTML landing page
+- NGINX reload without downtime
+- Systemd integration to manage the container via `systemctl`
 
-Basic knowledge of Odoo and Docker
+---
 
-Setup & Deployment
-Clone this repository:
+## Features
 
+| Feature                    | Description                                      |
+|----------------------------|--------------------------------------------------|
+| Docker NGINX            | Lightweight containerized NGINX reverse proxy    |
+| Auto-Restart            | Git SCM trigger via Jenkins                      |
+| Auto HTML               | Dynamic HTML generation on deploy                |
+| SSL Support             | Self-signed or real certificates (Let's Encrypt) |
+| Domain Load Balancing   | Ready for domain-level traffic handling          |
 
-git clone https://github.com/durgeshgupt9/odoo_jenkins_cicd.git
-cd odoo_project
-Run the installation script to create deployment structure and start containers:
+---
 
-bash jenkins_install.sh
-bash nginx_domain_odoo.sh
-This script will:
+script
+bash nginx_setup.sh
 
-Create nginx-odoo-setup-docker/ folder with subdirectories
+Jenkins CI/CD Setup
+Use the provided Jenkinsfile to:
 
-Copy necessary configs (docker-compose.yml, odoo.conf, Nginx files)
+Poll your Git repo every minute
 
-Launch PostgreSQL, Odoo, and Nginx containers with SSL & domain setup
+Clone HTML files
 
-Jenkins CI/CD Pipeline
-Polling: Jenkins polls the Git repository every 5 minutes for changes in addons/.
+Auto-generate HTML
+
+Rebuild & restart the container
+
+Reload NGINX inside Docker
+ Domain & SSL Setup
+1. Self-Signed SSL (for testing)
+
+openssl req -x509 -nodes -days 365 \
+-newkey rsa:2048 \
+-keyout ssl/yourdomain.key \
+-out ssl/yourdomain.crt \
+-subj "/CN=yourdomain.com"
+2. Real SSL (Production)
+Use Certbot + DNS/HTTP challenge (optional integration)
+
+Restart Behavior (CI/CD Flow)
+Jenkins polls repo
 
 On change:
 
-Jenkins pulls latest changes.
+Clones repo
 
-Restarts the Odoo Docker container (odoo18-app).
+Generates new HTML
 
-Runs optional deploy.sh inside Odoo container for module upgrades.
+Rebuilds Docker image
 
-How to Configure
-Configure Jenkins with the included Jenkinsfile.
+Restarts container
 
-Ensure Jenkins user can access Docker and the project directory.
-
-Modify environment variables in Jenkinsfile as needed.
-
-Development Workflow
-Develop your custom modules inside nginx-odoo-setup-docker/addons/.
-
-Commit and push your code to the Git repository.
-
-Jenkins automatically deploys updates with zero downtime by restarting only the Odoo container.
-
-Manual Docker Commands
-Start services manually:
-
-
-cd nginx-odoo-setup-docker
-docker-compose up -d
-Stop services:
-
-
-docker-compose down
-View Odoo logs:
-
-
-docker logs -f odoo18-app
-Configuration Details
-Odoo config: nginx-odoo-setup-docker/config/odoo.conf
-
-Custom addons: nginx-odoo-setup-docker/addons/
-
-Nginx config & SSL: nginx-odoo-setup-docker/nginx/conf.d/
-
-Docker Compose file: nginx-odoo-setup-docker/docker-compose.yml
-
-Troubleshooting
-Check Odoo container logs for errors:
-
-
-docker logs odoo18-app
-Ensure PostgreSQL container is running and volumes have correct permissions.
-
-Verify domain and SSL certificates are correctly configured in Nginx.
+Reloads NGINX config (no downtime)
