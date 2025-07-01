@@ -3,11 +3,9 @@
 This project sets up a **Docker-based NGINX** load balancer with:
 
 - Dynamic container restarts on Git changes using **Jenkins CI/CD (Poll SCM)**
-- No `docker-compose` – handled via individual Docker commands
 - Domain-based routing with **SSL support**
 - Auto-generated HTML landing page
 - NGINX reload without downtime
-- Systemd integration to manage the container via `systemctl`
 
 ---
 
